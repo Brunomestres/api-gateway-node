@@ -28,11 +28,14 @@ Este servico foi estruturado para atuar como porta de entrada da aplicacao, conc
 - headers de seguranca via `helmet`;
 - validacao global com remocao de campos nao permitidos;
 - rate limiting global;
-- configuracao dos endpoints-base dos microsservicos por variavel de ambiente.
+- configuracao dos endpoints-base dos microsservicos por variavel de ambiente;
+- servico interno de proxy HTTP baseado em `HttpModule`;
+- propagacao de contexto basico do usuario via headers;
+- health check interno por servico upstream.
 
 ## Estado atual do projeto
 
-No momento, o projeto ja esta preparado como base de gateway, mas a logica de proxy ainda nao foi implementada. O modulo `proxy` existe, porem `ProxyController` e `ProxyService` ainda estao sem rotas e sem encaminhamento efetivo de requisicoes.
+No momento, o projeto ja possui a camada de servico de proxy implementada, com encaminhamento HTTP e verificacao de saude dos servicos. O que ainda nao existe e uma camada publica de controller/rotas usando esse servico como entrada oficial do gateway.
 
 Hoje, as rotas observaveis no codigo sao:
 
@@ -46,7 +49,6 @@ src/
   config/
     gateway.config.ts
   proxy/
-    proxy.controller.ts
     proxy.module.ts
     proxy.service.ts
   app.controller.ts
@@ -92,20 +94,20 @@ Exemplo:
 
 ```env
 PORT=3000
-USERS_SERVICE_URL=http://localhost:30001
-PRODUCTS_SERVICE_URL=http://localhost:30002
-CHECKOUT_SERVICE_URL=http://localhost:30003
-PAYMENTS_SERVICE_URL=http://localhost:30004
+USERS_SERVICE_URL=http://localhost:3001
+PRODUCTS_SERVICE_URL=http://localhost:3002
+CHECKOUT_SERVICE_URL=http://localhost:3003
+PAYMENTS_SERVICE_URL=http://localhost:3004
 ```
 
 Se alguma variavel nao for informada, o projeto utiliza os seguintes valores padrao:
 
 | Variavel | Valor padrao |
 | --- | --- |
-| `USERS_SERVICE_URL` | `http://localhost:30001` |
-| `PRODUCTS_SERVICE_URL` | `http://localhost:30002` |
-| `CHECKOUT_SERVICE_URL` | `http://localhost:30003` |
-| `PAYMENTS_SERVICE_URL` | `http://localhost:30004` |
+| `USERS_SERVICE_URL` | `http://localhost:3001` |
+| `PRODUCTS_SERVICE_URL` | `http://localhost:3002` |
+| `CHECKOUT_SERVICE_URL` | `http://localhost:3003` |
+| `PAYMENTS_SERVICE_URL` | `http://localhost:3004` |
 
 ## Scripts disponiveis
 
@@ -154,9 +156,27 @@ Com a aplicacao em execucao, acesse:
 http://localhost:3000/api
 ```
 
+## Modulo Proxy
+
+O modulo `proxy` concentra a comunicacao HTTP com os microsservicos internos e hoje funciona como uma camada reutilizavel dentro da aplicacao.
+
+O `ProxyService` atualmente oferece:
+
+- `proxyRequest(serviceName, method, path, data, headers, userInfo)` para encaminhar requisicoes ao servico de destino;
+- `getServiceHealth(serviceName)` para consultar o endpoint `/health` de cada upstream;
+- enriquecimento dos headers com `X-User-id`, `X-User-email` e `X-User-role`;
+- log basico de tentativas e falhas de proxy.
+
+Servicos mapeados hoje:
+
+- `users`
+- `products`
+- `checkout`
+- `payments`
+
 ## Proximos passos sugeridos
 
-- implementar o encaminhamento das requisicoes no modulo `proxy`;
+- criar controllers que exponham rotas do gateway usando o `ProxyService`;
 - mapear rotas publicas e protegidas do gateway;
 - adicionar autenticacao e propagacao de tokens;
 - criar health checks por servico;
