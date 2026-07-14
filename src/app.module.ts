@@ -12,7 +12,11 @@ import { LoggingMiddleware } from "./middleware/logging/logging.middleware";
 		ConfigModule.forRoot({
 			isGlobal: true,
 		}),
-		ThrottlerModule.forRoot([{ ttl: 600000, limit: 100 }]),
+		ThrottlerModule.forRoot([
+			{ ttl: 600000, limit: 100, name: "medium" },
+			{ ttl: 1000, limit: 10, name: "short" },
+			{ ttl: 900000, limit: 1000, name: "long" },
+		]),
 		ProxyModule,
 		MiddlewareModule,
 	],
