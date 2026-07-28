@@ -1,10 +1,10 @@
-import { HttpModule } from "@nestjs/axios";
-import { Module } from "@nestjs/common";
-import { ConfigModule, ConfigService } from "@nestjs/config";
-import { JwtModule } from "@nestjs/jwt";
-import { PassportModule } from "@nestjs/passport";
 import { AuthService } from "./service/auth.service";
-import { AuthController } from './controller/auth.controller';
+import { AuthController } from "./controller/auth.controller";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { HttpModule } from "@nestjs/axios";
+import { PassportModule } from "@nestjs/passport";
+import { JwtModule } from "@nestjs/jwt";
+import { Module } from "@nestjs/common";
 
 @Module({
 	controllers: [AuthController],

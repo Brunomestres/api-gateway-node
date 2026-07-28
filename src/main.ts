@@ -11,10 +11,10 @@ async function bootstrap() {
 		helmet({
 			contentSecurityPolicy: {
 				directives: {
-					scriptSrc: ["self"],
-					defaultSrc: ["self"],
-					StyleSrc: ["self", "unsafe-line"],
-					imgSrc: ["self", "data:", "https"],
+					defaultSrc: ["'self'"],
+					scriptSrc: ["'self'"],
+					styleSrc: ["'self'", "'unsafe-inline'"],
+					imgSrc: ["'self'", "'data:'", "'https:'"],
 				},
 			},
 			crossOriginEmbedderPolicy: false,
