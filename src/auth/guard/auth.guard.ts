@@ -1,12 +1,11 @@
+import { Reflector } from "@nestjs/core";
+import { Observable } from "rxjs";
 import {
-	CanActivate,
 	ExecutionContext,
 	Injectable,
 	UnauthorizedException,
 } from "@nestjs/common";
-import { Reflector } from "@nestjs/core";
 import { AuthGuard } from "@nestjs/passport";
-import { Observable } from "rxjs";
 
 const JwtGuard = AuthGuard("jwt");
 
