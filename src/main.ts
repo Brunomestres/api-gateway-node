@@ -27,18 +27,29 @@ async function bootstrap() {
 	);
 
 	app.enableCors({
-		origin: (origin, cb) => {
-			if (!origin) {
-				cb(null, true);
-			}
+		origin: (origin, callback) => {
+			if (!origin) return callback(null, true);
+
 			const allowedOrigins = process.env.CORS_ORIGIN?.split(",") || ["*"];
 
 			if (allowedOrigins.includes("*") || allowedOrigins.includes(origin)) {
-				cb(null, true);
+				callback(null, true);
 			} else {
-				cb(new Error("Not allowed by CORS"));
+				callback(new Error("Not allowed by CORS"));
 			}
 		},
+		methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+		allowedHeaders: [
+			"Content-Type",
+			"Authorization",
+			"X-Requested-With",
+			"Accept",
+			"Origin",
+			"Access-Control-Request-Method",
+			"Access-Control-Request-Headers",
+		],
+		credentials: true,
+		maxAge: 86400, // 24 hours
 	});
 	app.useGlobalPipes(
 		new ValidationPipe({
@@ -49,9 +60,53 @@ async function bootstrap() {
 	);
 	const config = new DocumentBuilder()
 		.setTitle("Marketplace Api Gateway")
-		.setDescription("API Gateway for Marketplace Microservices")
+		.setDescription(`
+        API Gateway para o sistema de Marketplace com microserviços
+
+        Serviços Disponíveis:
+        - Users Service: Autenticação e gestão de usuários
+        - Products Service: Catálogo e gestão de produtos
+        - Checkout Service: Carrinho e processamento de pedidos
+        - Payments Service: Processamento de pagamentos
+
+        Autenticação:
+        - Use JWT Bearer token para rotas protegidas
+        - Use Session token para validação de sessão
+      `)
 		.setVersion("1.0")
-		.addBearerAuth()
+
+		.setContact(
+			"Marketplace Team",
+			"<https://marketplace.com>",
+			"dev@marketplace.com",
+		)
+		.setLicense("MIT", "<https://opensource.org/licenses/MIT>")
+		.addBearerAuth(
+			{
+				type: "http",
+				scheme: "bearer",
+				bearerFormat: "JWT",
+				name: "JWT",
+				description: "Enter JWT token",
+				in: "header",
+			},
+			"JWT-auth",
+		)
+		.addApiKey(
+			{
+				type: "apiKey",
+				name: "x-session-token",
+				in: "header",
+				description: "Session token for user validation",
+			},
+			"session-auth",
+		)
+		.addTag("Authentication", "Endpoints para autenticação e autorização")
+		.addTag("Users", "Endpoints para gestão de usuários")
+		.addTag("Products", "Endpoints para catálogo de produtos")
+		.addTag("Checkout", "Endpoints para carrinho e pedidos")
+		.addTag("Payments", "Endpoints para processamento de pagamentos")
+		.addTag("Health", "Endpoints para monitoramento de saúde")
 		.build();
 	const document = SwaggerModule.createDocument(app, config);
 	SwaggerModule.setup("api", app, document);
